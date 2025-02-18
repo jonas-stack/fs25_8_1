@@ -8,6 +8,7 @@ using WebSocketBoilerplate;
 
 public class CustomWebSocketServer(IConnectionManager manager, ILogger<CustomWebSocketServer> logger)
 {
+
     public void Start(WebApplication app)
     {
         var port = GetAvailablePort(8181);
