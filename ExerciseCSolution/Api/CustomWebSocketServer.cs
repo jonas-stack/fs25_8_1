@@ -1,11 +1,10 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Web;
+using Api;
 using Api.EventHandlers.Dtos;
 using Fleck;
 using WebSocketBoilerplate;
-
-namespace Api;
 
 public class CustomWebSocketServer(IConnectionManager manager, ILogger<CustomWebSocketServer> logger)
 {
@@ -15,14 +14,17 @@ public class CustomWebSocketServer(IConnectionManager manager, ILogger<CustomWeb
         Environment.SetEnvironmentVariable("PORT", port.ToString());
         var url = $"ws://0.0.0.0:{port}";
         var server = new WebSocketServer(url);
-        
+
         server.Start(socket =>
         {
             var queryString = socket.ConnectionInfo.Path.Split('?').Length > 1
                 ? socket.ConnectionInfo.Path.Split('?')[1]
                 : "";
 
+            logger.LogInformation("QueryString: {QueryString}", queryString);
+
             var id = HttpUtility.ParseQueryString(queryString)["id"];
+            logger.LogInformation("ClientId: {ClientId}", id);
 
             socket.OnOpen = () => manager.OnOpen(socket, id);
             socket.OnClose = () => manager.OnClose(socket, id);
@@ -35,7 +37,7 @@ public class CustomWebSocketServer(IConnectionManager manager, ILogger<CustomWeb
                         await app.CallEventHandler(socket, message);
                     }
                     catch (Exception e)
-                    { 
+                    {
                         logger.LogError(e, "Error while handling message");
                         socket.SendDto(new ServerSendsErrorMessageDto()
                         {

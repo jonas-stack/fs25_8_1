@@ -198,13 +198,18 @@ public class DictionaryConnectionManager : IConnectionManager
         _logger.LogInformation("ConnectionIdToSocket:");
         _logger.LogInformation(JsonSerializer.Serialize(new
         {
-            ConnectionIdToSocket = await GetAllConnectionIdsWithSocketId(),
-            SocketToCnnectionId = await GetAllSocketIdsWithConnectionId(),
+            ConnectionIdToSocket = ConnectionIdToSocket.ToDictionary(k => $"Client ID: {k.Key}", v => $"Socket ID: {v.Value.ConnectionInfo.Id}"),
+            SocketToConnectionId = SocketToConnectionId.ToDictionary(k => $"Socket ID: {k.Key}", v => $"Client ID: {v.Value}"),
             TopicsWithMembers = await GetAllTopicsWithMembers(),
             MembersWithTopics = await GetAllMembersWithTopics()
         }, new JsonSerializerOptions()
         {
             WriteIndented = true
         }));
+
+        foreach (var kvp in ConnectionIdToSocket)
+        {
+            _logger.LogInformation("ClientId: {ClientId}, SocketId: {SocketId}", kvp.Key, kvp.Value.ConnectionInfo.Id);
+        }
     }
 }

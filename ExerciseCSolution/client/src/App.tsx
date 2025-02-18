@@ -1,13 +1,19 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect, useRef } from 'react';
 import { WsClientProvider } from "ws-request-hook";
 import CollaborativeWhiteboard from "./CollaborativeWhiteboard";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function App() {
-    const randomUid = crypto.randomUUID();
-    console.log("Random UID: "+randomUid);
+    const clientIdRef = useRef(uuidv4());
+    const clientId = clientIdRef.current;
+
+    useEffect(() => {
+        console.log("Client ID generated: " + clientId);
+    }, [clientId]);
+
     return (
         <StrictMode>
-            <WsClientProvider url={'ws://localhost:8181?id='+randomUid}>
+            <WsClientProvider url={`ws://localhost:8181?id=${clientId}`}>
                 <div className="min-h-screen bg-gray-50">
                     <header className="bg-white shadow">
                         <div className="max-w-7xl mx-auto py-4 px-4">
